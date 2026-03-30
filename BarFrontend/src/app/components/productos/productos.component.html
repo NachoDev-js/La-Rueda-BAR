@@ -1,0 +1,37 @@
+<div style="padding: 20px; font-family: sans-serif;">
+  <h2>🍻 Menú de La Rueda Bar</h2>
+
+  <div style="background-color: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <h3>Agregar Nuevo Producto</h3>
+    <input type="text" [(ngModel)]="nuevoProducto.nombre" placeholder="Nombre (ej. Cerveza IPA)">
+    <input type="number" [(ngModel)]="nuevoProducto.precio" placeholder="Precio">
+    <input type="text" [(ngModel)]="nuevoProducto.categoria" placeholder="Categoría">
+
+    <button (click)="guardar()" style="margin-left: 10px; cursor: pointer;">Guardar en Menú</button>
+  </div>
+
+  <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
+    <thead style="background-color: #ddd;">
+      <tr>
+        <th style="padding: 8px;">ID</th>
+        <th style="padding: 8px;">Nombre</th>
+        <th style="padding: 8px;">Precio</th>
+        <th style="padding: 8px;">Categoría</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (prod of productos; track prod.id) {
+      <tr>
+        <td style="padding: 8px;">{{ prod.id }}</td>
+        <td style="padding: 8px;">{{ prod.nombre }}</td>
+        <td style="padding: 8px;">${{ prod.precio }}</td>
+        <td style="padding: 8px;">{{ prod.categoria }}</td>
+      </tr>
+      } @empty {
+      <tr>
+        <td colspan="4" style="padding: 8px; text-align: center;">No hay productos en el menú todavía.</td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
