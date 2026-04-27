@@ -1,0 +1,9 @@
+services:
+  larueda-app:
+    build: .
+    container_name: la_rueda_bar
+    ports:
+      - "5000:5000"
+    volumes:
+     - ./BarDatabase.db:/app/BarDatabase.db
+    restart: always

@@ -25,7 +25,7 @@ namespace BarBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Mesa>>> GetMesas()
         {
-            return await _context.Mesas.ToListAsync();
+            return await _context.Mesas.OrderBy(m => m.Orden).ToListAsync();
         }
 
         // GET: api/Mesas/5
@@ -43,7 +43,6 @@ namespace BarBackend.Controllers
         }
 
         // PUT: api/Mesas/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMesa(int id, Mesa mesa)
         {
@@ -74,7 +73,6 @@ namespace BarBackend.Controllers
         }
 
         // POST: api/Mesas
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Mesa>> PostMesa(Mesa mesa)
         {

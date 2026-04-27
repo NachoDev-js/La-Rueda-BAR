@@ -1,0 +1,56 @@
+<div class="container mt-5">
+  <div class="mb-4">
+    <h2 class="text-primary fw-bold">📦 Control de Stock</h2>
+    <p class="text-muted">Gestioná las cantidades físicas de tu mercadería.</p>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped mb-0 text-center align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th class="text-start pl-3">Producto</th>
+            <th>Categoría</th>
+            <th>Mínimo Ideal</th>
+            <th>Stock Físico</th>
+            <th>Estado</th>
+            <th>Ajuste Rápido</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (prod of productos; track prod.id) {
+          <tr>
+            <td class="text-start fw-bold pl-3">{{ prod.nombre }}</td>
+            <td><span class="badge bg-secondary">{{ prod.categoria }}</span></td>
+            <td class="text-muted">{{ prod.stockMinimo || 5 }}</td>
+            <td class="fs-5 fw-bold">{{ prod.stockActual || 0 }}</td>
+
+            <td>
+              @if ((prod.stockActual || 0) > (prod.stockMinimo || 5)) {
+              <span class="badge bg-success">🟢 Óptimo</span>
+              } @else if ((prod.stockActual || 0) > 0) {
+              <span class="badge bg-warning text-dark">🟡 Reponer Pronto</span>
+              } @else {
+              <span class="badge bg-danger">🔴 Sin Stock</span>
+              }
+            </td>
+
+            <td>
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-danger" (click)="ajustarStock(prod, -10)">-10</button>
+                <button class="btn btn-outline-danger btn-sm fw-bold" (click)="ajustarStock(prod, -1)" title="Restar 1">-1</button>
+                <button class="btn btn-outline-success btn-sm fw-bold" (click)="ajustarStock(prod, 1)" title="Sumar 1">+1</button>
+                <button class="btn btn-success btn-sm fw-bold px-3" (click)="ajustarStock(prod, 10)" title="Llegó un cajón (+10)">+10</button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="6" class="py-4 text-muted">No hay productos en el sistema todavía.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

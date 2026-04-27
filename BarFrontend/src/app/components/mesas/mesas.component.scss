@@ -1,0 +1,108 @@
+.cdk-drag-preview {
+  width: 250px !important;
+  height: 160px !important;
+  box-sizing: border-box;
+  border-radius: 10px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4) !important;
+  opacity: 0.95;
+  cursor: grabbing;
+  margin: 0 !important; 
+}
+
+.cdk-drag-placeholder {
+  opacity: 0 !important;
+  position: absolute !important; 
+  width: 0px !important;
+  height: 0px !important;
+}
+
+.mesa-slot {
+  position: relative; 
+  min-height: 160px;
+  height: 100%;
+  border-radius: 10px;
+  transition: background-color 0.2s ease, border 0.2s ease;
+  display: block;
+}
+
+.cdk-drag-preview {
+  width: 250px !important;
+  height: 160px !important;
+  box-sizing: border-box;
+  border-radius: 10px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4) !important;
+  opacity: 0.95;
+  cursor: grabbing;
+  margin: 0 !important;
+}
+
+.cdk-drop-list-receiving {
+  background-color: rgba(13, 110, 253, 0.1);
+  border: 2px dashed #0d6efd;
+}
+
+.cdk-drop-list-receiving {
+  background-color: rgba(13, 110, 253, 0.1);
+  border: 2px dashed #0d6efd;
+}
+
+/* --- PANEL LATERAL DE CAJA --- */
+.panel-lateral {
+  position: fixed;
+  top: 0;
+  right: -450px; 
+  width: 450px;
+  height: 100vh;
+  background-color: white;
+  z-index: 1050;
+  transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+  .panel-lateral.abierto {
+    right: 0; 
+  }
+
+.panel-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+.ticket-contenedor {
+  max-height: 50vh;
+}
+
+.skeleton-card {
+  height: 150px;
+  background: #2c2f33;
+  border: none;
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: placeholder-glow 1.5s infinite;
+  }
+}
+
+@keyframes placeholder-glow {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}

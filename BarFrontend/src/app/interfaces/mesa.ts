@@ -1,5 +1,9 @@
 export interface Mesa {
   id?: number;
   numero: number;
-  estado: string; // Puede ser "Libre" u "Ocupada"
+  estado: string; 
+  sector?: string; 
+  esPool?: boolean; 
+  horaInicioPool?: string | Date | null;
+  orden?: number; 
 }

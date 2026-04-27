@@ -1,28 +1,41 @@
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-primary fw-bold">🍻 Menú de La Rueda Bar</h2>
+    <h2 class="text-primary fw-bold">🍻 Menú de Productos</h2>
   </div>
 
   <div class="card shadow-sm mb-5">
     <div class="card-header bg-dark text-white">
-      <h5 class="mb-0">Agregar Nuevo Producto</h5>
+      <h5 class="mb-0">Gestión de Productos</h5>
     </div>
     <div class="card-body">
       <div class="row g-3 align-items-center">
         <div class="col-md-4">
           <input type="text" class="form-control" [(ngModel)]="nuevoProducto.nombre" placeholder="Nombre (ej. Cerveza IPA)">
         </div>
+
         <div class="col-md-3">
           <div class="input-group">
             <span class="input-group-text">$</span>
             <input type="number" class="form-control" [(ngModel)]="nuevoProducto.precio" placeholder="Precio">
           </div>
         </div>
+
         <div class="col-md-3">
-          <input type="text" class="form-control" [(ngModel)]="nuevoProducto.categoria" placeholder="Categoría">
+          <select class="form-select" [(ngModel)]="nuevoProducto.categoria">
+            <option value="Comida">Comida</option>
+            <option value="Bebidas">Bebidas</option>
+            <option value="Snacks">Snacks</option>
+          </select>
         </div>
+
         <div class="col-md-2 d-grid">
-          <button class="btn btn-success fw-bold" (click)="guardar()">Guardar</button>
+          <button class="btn btn-success fw-bold" (click)="guardar()" [disabled]="!esValido()">
+            {{ nuevoProducto.id ? 'Actualizar' : 'Guardar' }}
+          </button>
+
+          @if (nuevoProducto.id) {
+          <button class="btn btn-secondary mt-2 btn-sm" (click)="limpiarFormulario()">Cancelar</button>
+          }
         </div>
       </div>
     </div>
@@ -32,19 +45,22 @@
     <table class="table table-hover table-striped mb-0">
       <thead class="table-dark">
         <tr>
-          <th scope="col">ID</th>
           <th scope="col">Nombre</th>
           <th scope="col">Precio</th>
           <th scope="col">Categoría</th>
+          <th scope="col" class="text-center">Acciones</th>
         </tr>
       </thead>
       <tbody>
         @for (prod of productos; track prod.id) {
         <tr>
-          <td class="fw-bold">{{ prod.id }}</td>
-          <td>{{ prod.nombre }}</td>
-          <td class="text-success fw-bold">${{ prod.precio }}</td>
-          <td><span class="badge bg-secondary">{{ prod.categoria }}</span></td>
+          <td class="align-middle">{{ prod.nombre }}</td>
+          <td class="text-success fw-bold align-middle">${{ prod.precio }}</td>
+          <td class="align-middle"><span class="badge bg-secondary">{{ prod.categoria }}</span></td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary me-2" (click)="editar(prod)">✏️ Editar</button>
+            <button class="btn btn-sm btn-outline-danger" (click)="eliminar(prod.id)">🗑️ Borrar</button>
+          </td>
         </tr>
         } @empty {
         <tr>

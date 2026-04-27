@@ -17,7 +17,39 @@ namespace BarBackend.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
 
-            modelBuilder.Entity("BarBackend.Models.DetallePedido", b =>
+            modelBuilder.Entity("BarBackend.Models.Comanda", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("FechaHoraApertura")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("FechaHoraCierre")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MesaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("MetodoPago")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("TotalCobrado")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MesaId");
+
+                    b.ToTable("Comandas");
+                });
+
+            modelBuilder.Entity("BarBackend.Models.DetalleComanda", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -26,22 +58,22 @@ namespace BarBackend.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("PedidoId")
+                    b.Property<int>("ComandaId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("Subtotal")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("PedidoId");
+                    b.HasIndex("ComandaId");
 
                     b.HasIndex("ProductoId");
 
-                    b.ToTable("DetallesPedido");
+                    b.ToTable("DetallesComandas");
                 });
 
             modelBuilder.Entity("BarBackend.Models.Mesa", b =>
@@ -50,45 +82,29 @@ namespace BarBackend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("EsPool")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Estado")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("HoraInicioPool")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Numero")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Mesas");
-                });
-
-            modelBuilder.Entity("BarBackend.Models.Pedido", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("Orden")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Estado")
+                    b.Property<string>("Sector")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("FechaApertura")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("FechaCierre")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("MesaId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("MesaId");
-
-                    b.ToTable("Pedidos");
+                    b.ToTable("Mesas");
                 });
 
             modelBuilder.Entity("BarBackend.Models.Producto", b =>
@@ -108,31 +124,18 @@ namespace BarBackend.Migrations
                     b.Property<decimal>("Precio")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("StockActual")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StockMinimo")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("Productos");
                 });
 
-            modelBuilder.Entity("BarBackend.Models.DetallePedido", b =>
-                {
-                    b.HasOne("BarBackend.Models.Pedido", "Pedido")
-                        .WithMany("Detalles")
-                        .HasForeignKey("PedidoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BarBackend.Models.Producto", "Producto")
-                        .WithMany()
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pedido");
-
-                    b.Navigation("Producto");
-                });
-
-            modelBuilder.Entity("BarBackend.Models.Pedido", b =>
+            modelBuilder.Entity("BarBackend.Models.Comanda", b =>
                 {
                     b.HasOne("BarBackend.Models.Mesa", "Mesa")
                         .WithMany()
@@ -143,7 +146,26 @@ namespace BarBackend.Migrations
                     b.Navigation("Mesa");
                 });
 
-            modelBuilder.Entity("BarBackend.Models.Pedido", b =>
+            modelBuilder.Entity("BarBackend.Models.DetalleComanda", b =>
+                {
+                    b.HasOne("BarBackend.Models.Comanda", "Comanda")
+                        .WithMany("Detalles")
+                        .HasForeignKey("ComandaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BarBackend.Models.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comanda");
+
+                    b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("BarBackend.Models.Comanda", b =>
                 {
                     b.Navigation("Detalles");
                 });

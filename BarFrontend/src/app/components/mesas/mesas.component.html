@@ -1,6 +1,10 @@
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-primary fw-bold">🪑 Gestión del Salón</h2>
+    <h2 class="text-primary fw-bold">🪑 Menu Principal</h2>
+
+    <button class="btn btn-warning btn-lg fw-bold shadow-sm" (click)="abrirVentaRapida()">
+      ⚡ Venta Rápida
+    </button>
   </div>
 
   <div class="card shadow-sm mb-5">
@@ -10,46 +14,312 @@
     <div class="card-body">
       <div class="row g-3 align-items-center">
         <div class="col-md-4">
-          <input type="number" class="form-control" [(ngModel)]="nuevaMesa.numero" placeholder="Número de Mesa (ej. 1)">
-        </div>
-        <div class="col-md-4">
-          <select class="form-select" [(ngModel)]="nuevaMesa.estado">
-            <option value="Libre">Libre</option>
-            <option value="Ocupada">Ocupada</option>
+          <label class="form-label text-muted small fw-bold">Ubicación</label>
+          <select class="form-select" [(ngModel)]="nuevaMesa.sector">
+            <option value="Interior">🏠 Sector Interior</option>
+            <option value="Exterior">🌿 Sector Exterior</option>
           </select>
         </div>
+        <div class="col-md-4 d-flex align-items-end pb-1">
+          <div class="form-check form-switch fs-5 ms-2">
+            <input class="form-check-input" type="checkbox" id="esPool" [(ngModel)]="nuevaMesa.esPool">
+            <label class="form-check-label fw-bold" for="esPool">🎱 Es Pool</label>
+          </div>
+        </div>
         <div class="col-md-4 d-grid">
-          <button class="btn btn-success fw-bold" (click)="guardar()">Guardar Mesa</button>
+          <button class="btn btn-primary fw-bold py-2" (click)="guardar()">
+            Confirmar y Crear Mesa
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="row">
-    @for (mesa of mesas; track mesa.id) {
-    <div class="col-md-3 mb-4">
-      <div class="card text-center shadow-sm h-100 border-2"
-           [class.border-success]="mesa.estado === 'Libre'"
-           [class.border-danger]="mesa.estado === 'Ocupada'">
+  <div cdkDropListGroup>
 
-        <div class="card-body"
-             [class.bg-success-subtle]="mesa.estado === 'Libre'"
-             [class.bg-danger-subtle]="mesa.estado === 'Ocupada'">
-
-          <h1 class="display-3 fw-bold my-3">{{ mesa.numero }}</h1>
-
-          <span class="badge rounded-pill fs-6"
-                [class.text-bg-success]="mesa.estado === 'Libre'"
-                [class.text-bg-danger]="mesa.estado === 'Ocupada'">
-            {{ mesa.estado }}
-          </span>
+    <div *ngIf="loading" class="row g-3">
+      <h3 class="mt-4 mb-3 text-muted">Cargando mesas...</h3>
+      <div class="col-md-3" *ngFor="let item of [1,2,3,4,5,6,7,8]">
+        <div class="card skeleton-card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="skeleton-shimmer mb-3" style="width: 60%; height: 25px;"></div>
+            <div class="skeleton-shimmer" style="width: 40%; height: 15px;"></div>
+            <div class="d-flex justify-content-center mt-4">
+              <div class="skeleton-shimmer" style="width: 80%; height: 35px; border-radius: 5px;"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    } @empty {
-    <div class="col-12 text-center text-muted mt-4">
-      <p>No hay mesas configuradas todavía. ¡Agregá la Mesa 1 para empezar!</p>
+
+    <div cdkDropListGroup *ngIf="!loading">
+
+    <h3 class="mt-4 mb-3 text-primary fw-bold">🏠 Sector Interior</h3>
+    <div class="row g-3">
+      @for (mesa of mesasInterior; track mesa.numero) {
+      <div class="col-md-3">
+        <div cdkDropList
+             [cdkDropListData]="mesa"
+             (cdkDropListEntered)="alEntrar($event)"
+             (cdkDropListDropped)="alSoltar($event)"
+             class="mesa-slot">
+
+          <div cdkDrag [cdkDragData]="mesa" class="h-100 w-100" style="cursor: grab;">
+
+            @if (mesa.esPool) {
+            <div class="card text-white bg-dark text-center shadow-sm rounded-pill py-2 border border-secondary border-3 h-100"
+                 (click)="abrirPanel(mesa)" style="cursor: pointer;">
+              <div class="card-body">
+                <h5 class="card-title mb-1">🎱 Pool {{ mesa.numero }}</h5>
+                @if (mesa.horaInicioPool) {
+                <p class="text-warning fw-bold mb-2 fs-5 text-monospace">⏱️ {{ tiempoPoolFormat(mesa.horaInicioPool) }}</p>
+                } @else {
+                <p class="text-success fw-bold mb-2">🟩 Libre</p>
+                }
+                <div class="mt-2">
+                  <button class="btn btn-sm btn-outline-light rounded-pill mt-2" (click)="eliminar(mesa.id); $event.stopPropagation()">🗑️ Borrar</button>
+                </div>
+              </div>
+            </div>
+            } @else {
+            <div class="card text-center shadow-sm h-100"
+                 [class.border-danger]="mesa.estado === 'Ocupada'"
+                 [class.border-success]="mesa.estado === 'Libre'"
+                 (click)="abrirPanel(mesa)" style="cursor: pointer;">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <h5 class="card-title">Mesa {{ mesa.numero }}</h5>
+                  <p class="card-text fw-bold" [class.text-danger]="mesa.estado === 'Ocupada'" [class.text-success]="mesa.estado === 'Libre'">
+                    {{ mesa.estado === 'Libre' ? '🟩 Libre' : '🟥 Ocupada' }}
+                  </p>
+                </div>
+                <button class="btn btn-sm btn-outline-danger mt-3" (click)="eliminar(mesa.id); $event.stopPropagation()">🗑️ Borrar</button>
+              </div>
+            </div>
+            }
+
+          </div>
+        </div>
+      </div>
+      }
     </div>
-    }
+
+    <hr class="border border-dark border-3 opacity-25 my-5">
+
+    <h3 class="mb-3 text-primary fw-bold">🌿 Sector Exterior</h3>
+    <div class="row g-3">
+      @for (mesa of mesasExterior; track mesa.numero) {
+      <div class="col-md-3">
+        <div cdkDropList
+             [cdkDropListData]="mesa"
+             (cdkDropListEntered)="alEntrar($event)"
+             (cdkDropListDropped)="alSoltar($event)"
+             class="mesa-slot">
+
+          <div cdkDrag [cdkDragData]="mesa" class="h-100 w-100" style="cursor: grab;">
+
+            @if (mesa.esPool) {
+            <div class="card text-white bg-dark text-center shadow-sm rounded-pill py-2 border border-secondary border-3 h-100"
+                 (click)="abrirPanel(mesa)" style="cursor: pointer;">
+              <div class="card-body">
+                <h5 class="card-title mb-1">🎱 Pool {{ mesa.numero }}</h5>
+                @if (mesa.horaInicioPool) {
+                <p class="text-warning fw-bold mb-2 fs-5 text-monospace">⏱️ {{ tiempoPoolFormat(mesa.horaInicioPool) }}</p>
+                } @else {
+                <p class="text-success fw-bold mb-2">🟩 Libre</p>
+                }
+                <div class="mt-2">
+                  <button class="btn btn-sm btn-outline-light rounded-pill mt-2" (click)="eliminar(mesa.id); $event.stopPropagation()">🗑️ Borrar</button>
+                </div>
+              </div>
+            </div>
+            } @else {
+            <div class="card text-center shadow-sm h-100"
+                 [class.border-danger]="mesa.estado === 'Ocupada'"
+                 [class.border-success]="mesa.estado === 'Libre'"
+                 (click)="abrirPanel(mesa)" style="cursor: pointer;">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <h5 class="card-title">Mesa {{ mesa.numero }}</h5>
+                  <p class="card-text fw-bold" [class.text-danger]="mesa.estado === 'Ocupada'" [class.text-success]="mesa.estado === 'Libre'">
+                    {{ mesa.estado === 'Libre' ? '🟩 Libre' : '🟥 Ocupada' }}
+                  </p>
+                </div>
+                <button class="btn btn-sm btn-outline-danger mt-3" (click)="eliminar(mesa.id); $event.stopPropagation()">🗑️ Borrar</button>
+              </div>
+            </div>
+            }
+
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
   </div>
 </div>
+
+<div class="panel-lateral shadow-lg" [class.abierto]="panelAbierto">
+
+  @if (mesaActiva) {
+  <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3">
+    <h4 class="mb-0 fw-bold">
+      {{ mesaActiva.esPool ? '🎱 Pool' : '🪑 Mesa' }} {{ mesaActiva.numero }}
+    </h4>
+    <button class="btn-close btn-close-white" (click)="cerrarPanel()"></button>
+  </div>
+
+  <div class="p-4 h-100 d-flex flex-column">
+
+    @if (mesaActiva.estado === 'Libre') {
+    <div class="text-center mt-5">
+      <div class="display-1 text-success mb-3">🟩</div>
+      <h3 class="text-muted">Mesa Disponible</h3>
+      <button class="btn btn-success btn-lg fw-bold mt-3 px-5 rounded-pill shadow-sm" (click)="abrirCuenta()">
+        ▶️ Abrir Mesa
+      </button>
+    </div>
+    }
+
+    @else if (comandaActiva) {
+
+    <div class="ticket-contenedor bg-light border p-3 rounded shadow-sm flex-grow-1 overflow-auto mb-4">
+      <h6 class="text-muted border-bottom pb-2 mb-3">🎫 Ticket Actual</h6>
+
+      @if (comandaActiva.detalles && comandaActiva.detalles.length > 0) {
+      <ul class="list-group list-group-flush bg-transparent">
+        @for (item of comandaActiva.detalles; track item.id) {
+        <li class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center">
+
+          <div class="d-flex align-items-center gap-2">
+            <div class="btn-group btn-group-sm border rounded">
+              <button class="btn btn-light px-2" (click)="restarCantidad(item)">-</button>
+              <span class="btn btn-light px-2 fw-bold text-dark disabled border-0">{{ item.cantidad }}</span>
+              <button class="btn btn-light px-2" (click)="sumarCantidad(item)">+</button>
+            </div>
+            <span>{{ item.producto?.nombre || 'Producto' }}</span>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <span class="fw-bold text-success">${{ item.subtotal }}</span>
+            <button class="btn btn-sm btn-outline-danger border-0" (click)="eliminarDelTicket(item)" title="Quitar del ticket">
+              🗑️
+            </button>
+          </div>
+
+        </li>
+        }
+      </ul>
+      } @else {
+      <p class="text-center text-muted mt-4">La cuenta está abierta pero no hay pedidos todavía.</p>
+      }
+    </div>
+
+    <div class="agregar-producto-caja border-top pt-3">
+      <label class="small fw-bold text-muted mb-1">Agregar Pedido</label>
+
+      <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text bg-white text-muted border-end-0">🔍</span>
+        <input type="text" class="form-control border-start-0 ps-0 shadow-none"
+               placeholder="Buscar por nombre..."
+               [(ngModel)]="textoBusqueda">
+      </div>
+
+      <div class="input-group mb-3">
+        <select class="form-select" [(ngModel)]="productoSeleccionadoId">
+          <option value="0" disabled selected>Seleccionar producto...</option>
+
+          @for (prod of productosFiltrados; track prod.id) {
+          <option [value]="prod.id">{{ prod.nombre }} - ${{ prod.precio }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-4">
+          <input type="number" class="form-control text-center" [(ngModel)]="cantidadSeleccionada" min="1">
+        </div>
+        <div class="col-8 d-grid">
+          <button class="btn btn-primary fw-bold" (click)="agregarAlTicket()" [disabled]="productoSeleccionadoId == 0">
+            ➕ Cargar al Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    @if (!mostrandoPago) {
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 fw-bold">TOTAL:</h5>
+      <h3 class="mb-0 text-danger fw-bold">${{ totalComandaActual }}</h3>
+    </div>
+    <button class="btn btn-danger btn-lg w-100 fw-bold" (click)="iniciarCobro()" [disabled]="totalComandaActual === 0">
+      💳 Pasar a Cobro
+    </button>
+    }
+
+    @else {
+    <div class="bg-light p-3 rounded border border-primary mb-3">
+      <h5 class="fw-bold mb-2">Confirmar Pago</h5>
+
+      <div class="small mb-3 pb-2 border-bottom">
+        <div class="d-flex justify-content-between">
+          <span>Consumo Barra/Comida:</span>
+          <span>${{ subtotalProductos }}</span>
+        </div>
+        @if (recargoPoolActual > 0) {
+        <div class="d-flex justify-content-between text-primary">
+          <span>Alquiler Pool:</span>
+          <span>+ ${{ recargoPoolActual }}</span>
+        </div>
+        }
+        <div class="d-flex justify-content-between fw-bold mt-1 text-danger">
+          <span>TOTAL A COBRAR:</span>
+          <span>${{ totalComandaActual }}</span>
+        </div>
+      </div>
+
+      <label class="small fw-bold text-muted">Método de Pago</label>
+      <select class="form-select mb-3" [(ngModel)]="metodoPagoSeleccionado">
+        <option value="Efectivo">💵 Efectivo</option>
+        <option value="MercadoPago">📱 MercadoPago / Transferencia</option>
+      </select>
+
+      @if (metodoPagoSeleccionado === 'Efectivo') {
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="small fw-bold text-muted">Abonan con:</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="number" class="form-control" [(ngModel)]="montoEntregado" min="0">
+          </div>
+        </div>
+        <div class="col-6 text-end">
+          <label class="small fw-bold text-muted">Vuelto:</label>
+          <h4 class="mb-0 text-primary fw-bold" [class.text-danger]="vuelto < 0">
+            ${{ vuelto }}
+          </h4>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary w-50 fw-bold" (click)="mostrandoPago = false">
+        ⬅️ Atrás
+      </button>
+      <button class="btn btn-success w-100 fw-bold" (click)="confirmarCobroDefinitivo()" [disabled]="metodoPagoSeleccionado === 'Efectivo' && vuelto < 0">
+        ✅ Confirmar ${{ totalComandaActual }}
+      </button>
+    </div>
+    }
+
+    }
+  </div>
+  }
+</div>
+
+@if (panelAbierto) {
+<div class="panel-backdrop" (click)="cerrarPanel()"></div>
+}

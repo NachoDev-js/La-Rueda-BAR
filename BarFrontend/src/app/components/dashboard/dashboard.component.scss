@@ -1,0 +1,59 @@
+.container {
+  background-color: #1a1d20; // Un fondo oscuro para que resalten las cards
+  padding: 2rem;
+  border-radius: 15px;
+  min-height: 80vh;
+}
+
+h2 {
+  color: #ffffff !important; // Título en blanco
+  font-weight: bold;
+}
+
+.btn-outline-light {
+  color: #f8f9fa !important;
+  border-color: #f8f9fa !important;
+
+  &:hover {
+    background-color: #f8f9fa;
+    color: #212529 !important;
+  }
+}
+
+.card {
+  transition: transform 0.3s ease;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-5px); // Levanta un poquito la card
+  }
+}
+
+.display-4, .display-5 {
+  font-family: 'Consolas', monospace; // Estilo "contable" para los números
+}
+
+/* Estilo para la caja de resultados del filtro */
+.alert-dark {
+  background-color: #1e2125 !important; /* Gris casi negro */
+  border-left: 5px solid #0d6efd !important; /* Borde azul a la izquierda */
+  color: white !important;
+}
+
+/* Forzamos el color de los títulos de búsqueda si el dueño usa modo claro */
+.card-title.text-dark {
+  color: #212529 !important;
+  font-weight: 700;
+}
+
+/* El total en verde brillante para que salte a la vista */
+.text-success {
+  color: #2ecc71 !important;
+  text-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
+}
+
+/* Estilo para las etiquetas de los inputs */
+.form-label {
+  color: #495057 !important;
+  font-weight: 600;
+}

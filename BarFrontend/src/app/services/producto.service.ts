@@ -8,7 +8,7 @@ import { Producto } from '../interfaces/producto';
 })
 export class ProductoService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5199/api/Productos'; // <-- ¡Tu puerto de .NET!
+  private apiUrl = '/api/Productos'; 
 
   // Traer todos los productos
   getProductos(): Observable<Producto[]> {
@@ -18,5 +18,15 @@ export class ProductoService {
   // Crear un producto nuevo
   crearProducto(producto: Producto): Observable<Producto> {
     return this.http.post<Producto>(this.apiUrl, producto);
+  }
+
+  // Editar un producto existente 
+  actualizarProducto(id: number, producto: Producto): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, producto);
+  }
+
+  // Eliminar un producto 
+  eliminarProducto(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

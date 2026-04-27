@@ -8,7 +8,7 @@ import { Mesa } from '../interfaces/mesa';
 })
 export class MesaService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5199/api/Mesas';
+  private apiUrl = '/api/mesas';
 
   getMesas(): Observable<Mesa[]> {
     return this.http.get<Mesa[]>(this.apiUrl);
@@ -17,4 +17,13 @@ export class MesaService {
   crearMesa(mesa: Mesa): Observable<Mesa> {
     return this.http.post<Mesa>(this.apiUrl, mesa);
   }
+
+  eliminarMesa(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  actualizarMesa(mesa: Mesa): Observable<Mesa> {
+    return this.http.put<Mesa>(`${this.apiUrl}/${mesa.id}`, mesa);
+  }
+
 }
