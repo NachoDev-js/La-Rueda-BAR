@@ -12,7 +12,7 @@ appsettings.local.json
 # =========================
 # Base de Datos
 # =========================
-*.db
+#*.db
 *.db-shm
 *.db-wal
 *.sqlite
