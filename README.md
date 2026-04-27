@@ -82,3 +82,7 @@ Abre tu navegador en: http://localhost:5000
 /publish_docker: Archivos listos para producción y despliegue en Mac/Linux.
 
 docker-compose.yml: Configuración de orquestación del contenedor.
+
+NOTA
+
+Asegurarse de copiar el archivo BarDatabase.db dentro del publish_docker
