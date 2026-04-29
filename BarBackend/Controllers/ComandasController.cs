@@ -54,7 +54,7 @@ namespace BarBackend.Controllers
             {
                 MesaId = mesaId,
                 Estado = "Abierta",
-                FechaHoraApertura = DateTime.Now,
+                FechaHoraApertura = DateTime.UtcNow,
                 TotalCobrado = 0
             };
 
@@ -66,7 +66,7 @@ namespace BarBackend.Controllers
             // Si la mesa es de pool, iniciamos el reloj
             if (mesa.EsPool)
             {
-                mesa.HoraInicioPool = DateTime.Now;
+                mesa.HoraInicioPool = DateTime.UtcNow;
             }
 
             await _context.SaveChangesAsync();

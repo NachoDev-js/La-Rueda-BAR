@@ -87,22 +87,33 @@ export class MesasComponent implements OnInit {
   // ==========================================
 
   cargarMesas() {
-    this.loading = true; // Empezamos mostrando el esqueleto
-
+    this.loading = true;
     this.mesaService.getMesas().subscribe({
       next: (data) => {
-        // Separamos por sector como ya lo venías haciendo
         this.mesasInterior = data.filter(m => m.sector === 'Interior');
         this.mesasExterior = data.filter(m => m.sector === 'Exterior');
-
         this.ordenarListasLocales();
+
+        // --- EL TRUCO ESTÁ ACÁ ---
+        // Si el componente se reinició, recuperamos cuál era la mesa abierta
+        const idGuardado = localStorage.getItem('ultimaMesaId');
+        if (idGuardado) {
+          const mesaEncontrada = data.find(m => m.id === Number(idGuardado));
+          if (mesaEncontrada) {
+            // Re-asignamos la mesa activa con la data fresquita que llegó del server
+            this.mesaActiva = mesaEncontrada;
+            this.panelAbierto = true;
+            // Si la mesa está ocupada, cargamos su comanda también
+            if (this.mesaActiva.estado === 'Ocupada') {
+              this.comandaService.getComandaActiva(this.mesaActiva.id).subscribe(c => this.comandaActiva = c);
+            }
+          }
+        }
+
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-      }
+      error: (err) => { console.error(err); this.loading = false; }
     });
   }
 
@@ -217,36 +228,33 @@ export class MesasComponent implements OnInit {
   abrirPanel(mesa: any) {
     this.mesaActiva = mesa;
     this.panelAbierto = true;
-    this.esVentaRapida = false;
-    this.mostrandoPago = false;
-    if (mesa.estado === 'Ocupada') {
+
+    // GUARDAMOS: Así el sistema recuerda qué mesa estábamos viendo
+    localStorage.setItem('ultimaMesaId', mesa.id.toString());
+
+    if (mesa.id !== 0 && mesa.estado === 'Ocupada') {
       this.comandaService.getComandaActiva(mesa.id).subscribe(c => this.comandaActiva = c);
-    } else {
-      this.comandaActiva = null;
     }
   }
 
   cerrarPanel() {
     this.panelAbierto = false;
     this.mesaActiva = null;
-    this.esVentaRapida = false;
+    // BORRAMOS: Para que no se abra solo la próxima vez que entres
+    localStorage.removeItem('ultimaMesaId');
   }
 
   abrirCuenta() {
     if (!this.mesaActiva) return;
 
-    this.mesaActiva.estado = 'Ocupada';
-    if (this.mesaActiva.esPool) this.mesaActiva.horaInicioPool = new Date();
-
-    this.comandaActiva = { id: 0, mesaId: this.mesaActiva.id, detalles: [] };
-
     this.comandaService.abrirComanda(this.mesaActiva.id).subscribe({
       next: (nueva) => {
-        this.comandaActiva = nueva; 
+        this.comandaActiva = nueva;
+        this.cargarMesas();
       },
       error: () => {
         alert("Error al abrir mesa");
-        this.cargarMesas(); 
+        this.cargarMesas();
       }
     });
   }
@@ -322,7 +330,7 @@ export class MesasComponent implements OnInit {
       item.subtotal = item.cantidad * item.precioUnitario;
 
       this.comandaService.agregarProducto(this.comandaActiva.id, item.productoId, 1).subscribe({
-        error: () => this.abrirPanel(this.mesaActiva) 
+        error: () => this.abrirPanel(this.mesaActiva)
       });
     }
   }
@@ -415,9 +423,36 @@ export class MesasComponent implements OnInit {
   // UTILIDADES POOL
   // ==========================================
 
+  parsearFechaPool(inicio: any): Date | null {
+    if (!inicio) return null;
+
+    // 1. Si Angular le asignó un new Date() local al abrir la mesa recién
+    if (inicio instanceof Date) return inicio;
+
+    let fechaStr = String(inicio);
+
+    // 2. Si viene de C# con la "T" 
+    if (fechaStr.includes('T')) {
+      let partes = fechaStr.split('.'); 
+      let fechaLimpia = partes[0];
+      if (!fechaLimpia.endsWith('Z')) {
+        fechaLimpia += 'Z'; 
+      }
+      return new Date(fechaLimpia);
+    }
+
+    // 3. Fallback por si llega otra cosa
+    const fechaFallback = new Date(fechaStr);
+    return isNaN(fechaFallback.getTime()) ? null : fechaFallback;
+  }
+
   tiempoPoolFormat(inicio: any): string {
-    const diff = Math.floor((new Date().getTime() - new Date(inicio).getTime()) / 1000);
-    if (diff < 0) return '00:00:00';
+    const fechaInicio = this.parsearFechaPool(inicio);
+    if (!fechaInicio) return '00:00:00';
+
+    let diff = Math.floor((new Date().getTime() - fechaInicio.getTime()) / 1000);
+    if (diff < 0) diff = 0; // Evita cronómetros negativos
+
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
     const s = diff % 60;
@@ -426,7 +461,13 @@ export class MesasComponent implements OnInit {
   }
 
   calcularCostoPoolEnVivo(inicio: any): number {
-    const min = (new Date().getTime() - new Date(inicio).getTime()) / 60000;
+    const fechaInicio = this.parsearFechaPool(inicio);
+    if (!fechaInicio) return 0;
+
+    const diffMs = new Date().getTime() - fechaInicio.getTime();
+    if (diffMs <= 0) return 0; 
+
+    const min = diffMs / 60000;
     return Math.ceil(min / 30) * 6000;
   }
 }
