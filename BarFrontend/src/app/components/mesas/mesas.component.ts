@@ -53,10 +53,6 @@ export class MesasComponent implements OnInit {
     setInterval(() => { this.cdr.detectChanges(); }, 1000);
   }
 
-  // ==========================================
-  // GETTERS (Cálculos en tiempo real)
-  // ==========================================
-
   get productosFiltrados() {
     if (!this.textoBusqueda) return this.productosMenu;
     return this.productosMenu.filter(p => p.nombre.toLowerCase().includes(this.textoBusqueda.toLowerCase()));
@@ -82,9 +78,9 @@ export class MesasComponent implements OnInit {
     return this.montoEntregado - this.totalComandaActual;
   }
 
-  // ==========================================
-  // GESTIÓN DE MESAS (UI Optimista y Drag&Drop)
-  // ==========================================
+  // =================
+  // GESTIÓN DE MESAS 
+  // =================
 
   cargarMesas() {
     this.loading = true;
@@ -94,13 +90,12 @@ export class MesasComponent implements OnInit {
         this.mesasExterior = data.filter(m => m.sector === 'Exterior');
         this.ordenarListasLocales();
 
-        // --- EL TRUCO ESTÁ ACÁ ---
         // Si el componente se reinició, recuperamos cuál era la mesa abierta
         const idGuardado = localStorage.getItem('ultimaMesaId');
         if (idGuardado) {
           const mesaEncontrada = data.find(m => m.id === Number(idGuardado));
           if (mesaEncontrada) {
-            // Re-asignamos la mesa activa con la data fresquita que llegó del server
+            // Re-asignamos la mesa activa 
             this.mesaActiva = mesaEncontrada;
             this.panelAbierto = true;
             // Si la mesa está ocupada, cargamos su comanda también
@@ -128,12 +123,10 @@ export class MesasComponent implements OnInit {
     const maxNum = todas.length > 0 ? Math.max(...todas.map(m => m.numero)) : 0;
     this.nuevaMesa.numero = maxNum + 1;
 
-    // NUEVO: Calculamos el máximo orden para la posición física
     // Usamos || 0 por si alguna mesa vieja tiene el campo orden como undefined
     const maxOrden = todas.length > 0 ? Math.max(...todas.map(m => m.orden || 0)) : 0;
     this.nuevaMesa.orden = maxOrden + 1;
 
-    // UI Optimista (agregamos el orden aquí también para que se vea bien antes de que responda el server)
     const temp = { ...this.nuevaMesa, id: 0, orden: this.nuevaMesa.orden };
 
     if (this.nuevaMesa.sector === 'Interior') {
@@ -145,7 +138,6 @@ export class MesasComponent implements OnInit {
     this.mesaService.crearMesa(this.nuevaMesa as Mesa).subscribe({
       next: () => {
         this.cargarMesas();
-        // Reseteamos el objeto incluyendo el campo orden
         this.nuevaMesa = { sector: 'Interior', esPool: false, numero: 0, estado: 'Libre', orden: 0 };
       },
       error: () => this.cargarMesas()
@@ -162,27 +154,23 @@ export class MesasComponent implements OnInit {
   }
 
   alSoltar(event: CdkDragDrop<any>) {
-    // 1. Si se soltó en el mismo lugar, no hacemos nada
+    // Si se soltó en el mismo lugar, no hacemos nada
     if (event.previousContainer === event.container) return;
 
     const mesaArrastrada = event.item.data;
     const mesaDestino = event.container.data;
 
     if (mesaArrastrada && mesaDestino) {
-      // --- INTERCAMBIO TOTAL DE POSICIÓN ---
-
-      // Intercambiamos el Orden (para la posición en la grilla)
+   
       const ordenAux = mesaArrastrada.orden;
       mesaArrastrada.orden = mesaDestino.orden;
       mesaDestino.orden = ordenAux;
 
-      // ¡CLAVE!: Intercambiamos los Sectores
       // Si movés una del Interior al lugar de una del Exterior, ahora la arrastrada es Exterior
       const sectorAux = mesaArrastrada.sector;
       mesaArrastrada.sector = mesaDestino.sector;
       mesaDestino.sector = sectorAux;
 
-      // 2. Persistimos en el servidor (Actualizamos ambas mesas)
       this.mesaService.actualizarMesa(mesaArrastrada).subscribe({
         next: () => console.log(`${mesaArrastrada.numero} ahora es ${mesaArrastrada.sector}`),
         error: () => this.cargarMesas()
@@ -193,17 +181,13 @@ export class MesasComponent implements OnInit {
         error: () => this.cargarMesas()
       });
 
-      // 3. Forzamos la actualización de los arrays locales para que los @if y filtros reaccionen
-      // Esto es necesario porque al cambiar el sector, la mesa debe "saltar" de un array al otro
       this.sincronizarArraysLocales();
     }
   }
 
   sincronizarArraysLocales() {
-    // Combinamos todo lo que tenemos en pantalla
     const todas = [...this.mesasInterior, ...this.mesasExterior];
 
-    // Volvemos a filtrar y ordenar
     this.mesasInterior = todas
       .filter(m => m.sector === 'Interior')
       .sort((a, b) => (a.orden || 0) - (b.orden || 0));
@@ -221,9 +205,9 @@ export class MesasComponent implements OnInit {
 
   alEntrar(event: any) { }
 
-  // ==========================================
+  // ==================
   // COMANDAS Y TICKETS
-  // ==========================================
+  // ==================
 
   abrirPanel(mesa: any) {
     this.mesaActiva = mesa;
@@ -240,7 +224,7 @@ export class MesasComponent implements OnInit {
   cerrarPanel() {
     this.panelAbierto = false;
     this.mesaActiva = null;
-    // BORRAMOS: Para que no se abra solo la próxima vez que entres
+    // BORRAMOS: Para que no se abra solo la próxima vez que entremos
     localStorage.removeItem('ultimaMesaId');
   }
 
@@ -271,7 +255,6 @@ export class MesasComponent implements OnInit {
     if (!this.comandaActiva || this.productoSeleccionadoId === 0) return;
 
     if (this.esVentaRapida) {
-      // (Lógica de venta rápida queda igual)
       const prod = this.productosMenu.find(p => p.id == this.productoSeleccionadoId);
       this.comandaActiva.detalles.push({
         productoId: this.productoSeleccionadoId,
@@ -287,7 +270,7 @@ export class MesasComponent implements OnInit {
 
       // 1. Creamos el objeto temporal (SIN ID)
       const nuevoDetalle = {
-        id: 0, // ID temporal
+        id: 0, 
         productoId: this.productoSeleccionadoId,
         producto: prod,
         cantidad: this.cantidadSeleccionada,
@@ -300,14 +283,12 @@ export class MesasComponent implements OnInit {
       // 2. Llamamos al servidor
       this.comandaService.agregarProducto(this.comandaActiva.id, this.productoSeleccionadoId, this.cantidadSeleccionada).subscribe({
         next: (detalleReal) => {
-          // IMPORTANTE: El servidor nos devuelve el detalle con su ID real (ej: 512)
-          // Lo asignamos al objeto que ya tenemos en pantalla
           nuevoDetalle.id = detalleReal.id;
           console.log("ID sincronizado desde el servidor:", nuevoDetalle.id);
         },
         error: () => {
           alert("Error al guardar producto");
-          this.abrirPanel(this.mesaActiva); // Recargamos para limpiar el temporal si falló
+          this.abrirPanel(this.mesaActiva); 
         }
       });
 
@@ -352,15 +333,12 @@ export class MesasComponent implements OnInit {
   }
 
   eliminarDelTicket(item: any) {
-    console.log("Intentando eliminar ítem:", item); // Mirá la consola para ver si tiene ID
+    console.log("Intentando eliminar ítem:", item); 
 
-    // 1. Borramos de la vista inmediatamente (UI Optimista)
     this.comandaActiva.detalles = this.comandaActiva.detalles.filter((d: any) => d !== item);
 
-    // 2. Si es Venta Rápida, no hacemos nada más (ya se borró de la lista local)
     if (this.esVentaRapida) return;
 
-    // 3. Si es Salón, mandamos el DELETE al servidor
     // Usamos el ID del detalle (item.id)
     if (item.id && item.id !== 0) {
       this.comandaService.eliminarDetalle(item.id).subscribe({
@@ -374,14 +352,13 @@ export class MesasComponent implements OnInit {
       });
     } else {
       console.warn("⚠️ No se envió DELETE porque el ítem no tiene ID real aún.");
-      // Si el ítem es muy nuevo y no tiene ID, lo mejor es recargar el panel
       this.abrirPanel(this.mesaActiva);
     }
   }
 
-  // ==========================================
+  // =====
   // COBRO
-  // ==========================================
+  // =====
 
   iniciarCobro() {
     this.mostrandoPago = true;
@@ -391,7 +368,6 @@ export class MesasComponent implements OnInit {
 
   confirmarCobroDefinitivo() {
     if (this.esVentaRapida) {
-      // Lógica de venta rápida (esta no falla porque siempre es local)
       const detalles = this.comandaActiva.detalles.map((d: any) => ({ productoId: d.productoId, cantidad: d.cantidad }));
       this.comandaService.cobrarVentaRapida(detalles, this.metodoPagoSeleccionado).subscribe({
         next: (res) => {
@@ -400,11 +376,9 @@ export class MesasComponent implements OnInit {
         }
       });
     } else {
-      // MODO SALÓN: Para evitar el error de la foto, vamos a refrescar la comanda una última vez
-      // o confiar en que el eliminarDelTicket funcionó.
       this.comandaService.cerrarComanda(this.comandaActiva.id, this.metodoPagoSeleccionado).subscribe({
         next: (res) => {
-          // Si el total que devuelve el server es muy distinto al que veías, te aviso
+          // Si el total que devuelve el server es muy distinto al que veías, te avisa
           if (Math.abs(res.total - this.totalComandaActual) > 1) {
             console.warn("Diferencia de total detectada entre Front y Back");
           }
@@ -419,19 +393,19 @@ export class MesasComponent implements OnInit {
     }
   }
 
-  // ==========================================
+  // ===============
   // UTILIDADES POOL
-  // ==========================================
+  // ===============
 
   parsearFechaPool(inicio: any): Date | null {
     if (!inicio) return null;
 
-    // 1. Si Angular le asignó un new Date() local al abrir la mesa recién
+    // Si Angular le asignó un new Date() local al abrir la mesa recién
     if (inicio instanceof Date) return inicio;
 
     let fechaStr = String(inicio);
 
-    // 2. Si viene de C# con la "T" 
+    // Si viene de C# con la "T" 
     if (fechaStr.includes('T')) {
       let partes = fechaStr.split('.'); 
       let fechaLimpia = partes[0];
@@ -441,7 +415,7 @@ export class MesasComponent implements OnInit {
       return new Date(fechaLimpia);
     }
 
-    // 3. Fallback por si llega otra cosa
+    // Fallback por si llega otra cosa
     const fechaFallback = new Date(fechaStr);
     return isNaN(fechaFallback.getTime()) ? null : fechaFallback;
   }

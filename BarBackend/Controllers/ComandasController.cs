@@ -34,7 +34,6 @@ namespace BarBackend.Controllers
         }
 
         // 2. ABRIR UNA MESA
-        // POST: api/comandas/abrir/5
         [HttpPost("abrir/{mesaId}")]
         public async Task<ActionResult<Comanda>> AbrirComanda(int mesaId)
         {
@@ -112,7 +111,6 @@ namespace BarBackend.Controllers
                 _context.DetallesComandas.Add(nuevoDetalle);
                 await _context.SaveChangesAsync();
 
-                // IMPORTANTE: Cargamos la propiedad "Producto" para que Angular no rompa al mostrar el nombre
                 nuevoDetalle.Producto = producto;
 
                 // DEVOLVEMOS EL OBJETO COMPLETO CON SU NUEVO ID
@@ -165,7 +163,6 @@ namespace BarBackend.Controllers
         }
 
         // 5. VENTA RÁPIDA DE MOSTRADOR (Takeaway)
-        // POST: api/comandas/venta-rapida
         [HttpPost("venta-rapida")]
         public async Task<IActionResult> ProcesarVentaRapida([FromBody] List<DetalleRequest> detalles, [FromQuery] string metodoPago = "Efectivo")
         {
@@ -239,7 +236,7 @@ namespace BarBackend.Controllers
             if (producto != null)
             {
                 producto.StockActual -= cantidad; // Restamos lo vendido
-                if (producto.StockActual < 0) producto.StockActual = 0; // Evitamos stock negativo si querés
+                if (producto.StockActual < 0) producto.StockActual = 0; // Evitamos stock negativo
                 _context.Entry(producto).State = EntityState.Modified;
             }
         }

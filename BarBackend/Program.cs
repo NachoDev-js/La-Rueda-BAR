@@ -43,8 +43,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// --- EL ORDEN DE ESTO ES CRÍTICO ---
-
 // 1. Archivos estáticos primero (Frontend)
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -57,7 +55,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // 3. Rutas y seguridad
-// app.UseHttpsRedirection(); // Comentalo si no tenés certificado SSL en el bar, evita errores 500
+// app.UseHttpsRedirection(); // Comentalo si no hay certificado SSL en el bar, evita errores 500
 app.UseCors("PermitirAngular");
 app.UseAuthorization();
 
